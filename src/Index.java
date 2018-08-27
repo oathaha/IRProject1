@@ -28,10 +28,14 @@ public class Index {
 	// Term id -> (position in index file, doc frequency) dictionary
 	private static Map<Integer, Pair<Long, Integer>> postingDict 
 		= new TreeMap<Integer, Pair<Long, Integer>>();
+	
 	// Doc name -> doc id dictionary
+	// docDict.put("doc_name",doc_id)
 	private static Map<String, Integer> docDict
 		= new TreeMap<String, Integer>();
+	
 	// Term -> term id dictionary
+	// termDict.put("term",term_id)
 	private static Map<String, Integer> termDict
 		= new TreeMap<String, Integer>();
 	// Block queue
