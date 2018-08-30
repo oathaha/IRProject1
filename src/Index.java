@@ -21,7 +21,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
+// hello from oat
 public class Index {
 
 	// Term id -> (position in index file, doc frequency) dictionary
