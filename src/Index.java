@@ -1,4 +1,4 @@
-//Hello Thanadon
+//Hello Tan
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
