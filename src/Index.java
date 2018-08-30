@@ -65,7 +65,10 @@ public class Index {
 		
 	}
 	
-
+	public void hello()
+	{
+		
+	}
 	 /**
      * Pop next element if there is one, otherwise return null
      * @param iter an iterator that contains integers
