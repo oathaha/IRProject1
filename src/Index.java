@@ -40,7 +40,7 @@ public class Index {
 	private static LinkedList<File> blockQueue
 		= new LinkedList<File>();
 
-	// Total file counter
+	// Total file counter   
 	private static int totalFileCount = 0;
 	// Document counter
 	private static int docIdCounter = 0;
