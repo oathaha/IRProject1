@@ -1,6 +1,4 @@
 
-//hello everyone
-//hello game
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
