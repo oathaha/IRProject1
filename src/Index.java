@@ -22,8 +22,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-// hello from oat
-// hello again... from oat
 public class Index {
 
 	// Term id -> (position in index file, doc frequency) dictionary
@@ -68,7 +66,10 @@ public class Index {
 		
 	}
 	
-
+	public void hello()
+	{
+		
+	}
 	 /**
      * Pop next element if there is one, otherwise return null
      * @param iter an iterator that contains integers
