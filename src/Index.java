@@ -1,4 +1,4 @@
-//hello from game
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 public class Index {
 
 	// Term id -> (position in index file, doc frequency) dictionary
@@ -41,7 +40,7 @@ public class Index {
 	private static LinkedList<File> blockQueue
 		= new LinkedList<File>();
 
-	// Total file counter
+	// Total file counter   
 	private static int totalFileCount = 0;
 	// Document counter
 	private static int docIdCounter = 0;
@@ -66,7 +65,10 @@ public class Index {
 		
 	}
 	
-
+	public void hello()
+	{
+		
+	}
 	 /**
      * Pop next element if there is one, otherwise return null
      * @param iter an iterator that contains integers
