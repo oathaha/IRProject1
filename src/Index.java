@@ -126,6 +126,10 @@ public class Index {
 		 */
 		
 		
+		/*calldelete line 264-294*/
+		deleteDir(outdir);
+		
+		
 		if (!outdir.exists()) {
 			if (!outdir.mkdirs()) {
 				System.err.println("Create output directory failure");
@@ -257,6 +261,37 @@ public class Index {
 		
 		return totalFileCount;
 	}
+	
+	private void deleteEmptyDir(File outdir) {
+		outdir.delete();
+		System.out.println("Directory is deleted: "+outdir.getAbsolutePath());
+	}
+	public static void deleteDir (File outdir) {
+		if (outdir.isDirectory())
+		{
+			if(outdir.list().length==0) {
+				deleteEmptyDir(outdir);
+			}else {
+				File files[] = outdir.listFiles();
+				
+				for (File fileDelete : files)
+                {
+                    deleteDir(fileDelete);
+                }
+				if (outdir.list().length==0)
+				{
+					deleteEmptyDir(outdir);
+				}
+			}
+		}else {
+			outdir.delete();
+			System.out.println("File is deleted "+outdir.getAbsolutePath());
+		}
+	}
+	
+	
+	
+	
 
 	public static void main(String[] args) throws IOException {
 		/* Parse command line */
