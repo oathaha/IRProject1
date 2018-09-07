@@ -262,7 +262,7 @@ public class Index {
 		return totalFileCount;
 	}
 	
-	private void deleteEmptyDir(File outdir) {
+	private static void deleteEmptyDir(File outdir) {
 		outdir.delete();
 		System.out.println("Directory is deleted: "+outdir.getAbsolutePath());
 	}
