@@ -15,6 +15,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -62,7 +63,10 @@ public class Index {
 		 * TODO: Your code here
 		 *	 
 		 */
-		
+		if (blockQueue.isEmpty()) {
+			postingDict.put(posting.getTermId(), new Pair<> (fc.position(), posting.getList().size()));
+		}
+		index.writePosting(fc,posting);
 	}
 	
 	public void hello()
@@ -138,7 +142,8 @@ public class Index {
 		}
 		
 		
-		
+		/*Combine to make Map*/
+		TreeMap<Integer, TreeSet<Integer>> TeeMap = new TreeMap<Integer, TreeSet<Integer>>();
 		
 		/* BSBI indexing algorithm */
 		File[] dirlist = rootdir.listFiles();
@@ -161,7 +166,8 @@ public class Index {
                 int docId = ++docIdCounter;
                 docDict.put(fileName, docId);
 				
-				
+                
+
 				BufferedReader reader = new BufferedReader(new FileReader(file));
 				String line;
 				while ((line = reader.readLine()) != null) {
@@ -172,7 +178,14 @@ public class Index {
 						 *       For each term, build up a list of
 						 *       documents in which the term occurs
 						 */
-
+							if(!termDict.containsKey(token)) {
+								termDict.put(token, wordIdCounter++);
+							}
+							int termId = termDict.get(token);
+							if(!TeeMap.containsKey(termId)) {
+								TeeMap.put(termId, new TreeSet<Integer>());
+							}
+							TeeMap.get(termId).add(docId);
 					}
 				}
 				reader.close();
@@ -185,6 +198,12 @@ public class Index {
 			}
 			
 			RandomAccessFile bfc = new RandomAccessFile(blockFile, "rw");
+			
+			FileChannel fc = bfc.getChannel();
+			for(int termId : TeeMap ) {
+				writePosting(fc, new PostingList(termId, new ArrayList<Integer>(TeeMap.get(termId))));
+			}
+			
 			
 			/*
 			 * TODO: Your code here
