@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-public class Index {
+public class Index { 
 
 	// Term id -> (position in index file, doc frequency) dictionary
 	private static Map<Integer, Pair<Long, Integer>> postingDict 
@@ -63,10 +63,7 @@ public class Index {
 		 * TODO: Your code here
 		 *	 
 		 */
-		if (blockQueue.isEmpty()) {
-			postingDict.put(posting.getTermId(), new Pair<> (fc.position(), posting.getList().size()));
-		}
-		index.writePosting(fc,posting);
+		
 	}
 	
 	public void hello()
@@ -151,7 +148,7 @@ public class Index {
 		/* For each block */
 		for (File block : dirlist) {
 			File blockFile = new File(outputDirname, block.getName());
-			//System.out.println("Processing block "+block.getName());
+			System.out.println("Processing block "+block.getName());
 			blockQueue.add(blockFile);
 
 			File blockDir = new File(dataDirname, block.getName());
@@ -178,9 +175,12 @@ public class Index {
 						 *       For each term, build up a list of
 						 *       documents in which the term occurs
 						 */
+						// for term dict
 							if(!termDict.containsKey(token)) {
-								termDict.put(token, wordIdCounter++);
+								termDict.put(token, ++wordIdCounter);
 							}
+							
+						// for posting list
 							int termId = termDict.get(token);
 							if(!TeeMap.containsKey(termId)) {
 								TeeMap.put(termId, new TreeSet<Integer>());
@@ -198,18 +198,16 @@ public class Index {
 			}
 			
 			RandomAccessFile bfc = new RandomAccessFile(blockFile, "rw");
-			
-			FileChannel fc = bfc.getChannel();
-			for(int termId : TeeMap ) {
-				writePosting(fc, new PostingList(termId, new ArrayList<Integer>(TeeMap.get(termId))));
-			}
-			
-			
+
 			/*
 			 * TODO: Your code here
 			 *       Write all posting lists for all terms to file (bfc) 
 			 */
-			
+			FileChannel fc = bfc.getChannel();
+			for(Integer termId : TeeMap.keySet() ) 
+			{
+				writePosting(fc, new PostingList(termId, new ArrayList<Integer>(TeeMap.get(termId))));
+			}
 			bfc.close();
 		}
 
@@ -242,7 +240,11 @@ public class Index {
 			 *       
 			 */
 			
-			
+			/*
+			 * 1. read data from bf1
+			 * 2. read data from bf2
+			 * 3. do merging algorithm ??? (merge to mf file)
+			 */
 			
 			bf1.close();
 			bf2.close();
@@ -252,6 +254,8 @@ public class Index {
 			blockQueue.add(combfile);
 		}
 
+		// create postingDict here???
+		
 		/* Dump constructed index back into file system */
 		File indexFile = blockQueue.removeFirst();
 		indexFile.renameTo(new File(outputDirname, "corpus.index"));
@@ -280,16 +284,12 @@ public class Index {
 		
 		return totalFileCount;
 	}
-	
-	private static void deleteEmptyDir(File outdir) {
-		outdir.delete();
-		System.out.println("Directory is deleted: "+outdir.getAbsolutePath());
-	}
+
 	public static void deleteDir (File outdir) {
 		if (outdir.isDirectory())
 		{
 			if(outdir.list().length==0) {
-				deleteEmptyDir(outdir);
+				outdir.delete();
 			}else {
 				File files[] = outdir.listFiles();
 				
@@ -299,7 +299,7 @@ public class Index {
                 }
 				if (outdir.list().length==0)
 				{
-					deleteEmptyDir(outdir);
+					outdir.delete();
 				}
 			}
 		}else {
@@ -307,10 +307,6 @@ public class Index {
 			System.out.println("File is deleted "+outdir.getAbsolutePath());
 		}
 	}
-	
-	
-	
-	
 
 	public static void main(String[] args) throws IOException {
 		/* Parse command line */
