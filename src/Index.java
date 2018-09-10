@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -14,9 +15,11 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -41,6 +44,8 @@ public class Index {
 	private static LinkedList<File> blockQueue
 		= new LinkedList<File>();
 
+	private static TreeMap<Integer, TreeSet<Integer>> TeeMap = new TreeMap<Integer, TreeSet<Integer>>();
+	
 	// Total file counter   
 	private static int totalFileCount = 0;
 	// Document counter
@@ -63,7 +68,11 @@ public class Index {
 		 * TODO: Your code here
 		 *	 
 		 */
-		
+		IntBuffer ib = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), (posting.getList().size()+2)*4).asIntBuffer();
+		ib.put(posting.getTermId());
+		ib.put(posting.getList().size());
+		for(Integer a: posting.getList())
+			ib.put(a);
 	}
 	
 	public void hello()
@@ -83,7 +92,62 @@ public class Index {
         }
     }
 	
-    
+    private static void mergeblock(RandomAccessFile bf1, RandomAccessFile bf2, RandomAccessFile mf) throws IOException
+    {
+    	FileChannel fc1 = bf1.getChannel();
+    	FileChannel fc2 = bf2.getChannel();
+    	FileChannel fc3 = mf.getChannel();
+		IntBuffer ib1 = fc1.map(FileChannel.MapMode.READ_WRITE, 0, fc1.size()).asIntBuffer();
+		IntBuffer ib2 = fc2.map(FileChannel.MapMode.READ_WRITE, 0, fc2.size()).asIntBuffer();
+		IntBuffer ib3 = fc3.map(FileChannel.MapMode.READ_WRITE, 0, fc3.size()).asIntBuffer();
+		
+		Set<Integer> combinedocid = new TreeSet<Integer>();
+		int i1 = 0; // position for bf1
+		int i2 = 0; // position for bf2
+		int c1 = 0; // count term in bf1
+		int c2 = 0; // count term in bf2
+		
+		try
+		{
+			while(true)
+			{
+				int tid1 = ib1.get(i1);	i1++;
+				int tid2 = ib2.get(i2);	i2++;
+				int doclen1 = ib1.get(i1); i1++;
+				int doclen2 = ib2.get(i2); i2++;
+				
+				if(tid1 == tid2) // we can merge
+				{
+					i1++; c1++;
+					i2++; c2++;
+					
+				}
+				else if(tid1 < tid2)
+				{
+					i1++; c1++;
+				}
+				else
+				{
+					i2++; c2++;
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			// put the rest of file to mf
+			// if c1 < c2 then put the rest from bf1 to mf
+			// if c1 > c2 then put the rest from bf2 to mf
+			if(c1 < c2)
+			{
+				
+			}
+			else
+			{
+				
+			}
+			System.out.println("Merge done");
+		}
+    }
    
 	
 	/**
@@ -128,7 +192,7 @@ public class Index {
 		
 		
 		/*calldelete line 264-294*/
-		deleteDir(outdir);
+		//deleteDir(outdir);
 		
 		
 		if (!outdir.exists()) {
@@ -140,7 +204,6 @@ public class Index {
 		
 		
 		/*Combine to make Map*/
-		TreeMap<Integer, TreeSet<Integer>> TeeMap = new TreeMap<Integer, TreeSet<Integer>>();
 		
 		/* BSBI indexing algorithm */
 		File[] dirlist = rootdir.listFiles();
@@ -207,7 +270,11 @@ public class Index {
 			for(Integer termId : TeeMap.keySet() ) 
 			{
 				writePosting(fc, new PostingList(termId, new ArrayList<Integer>(TeeMap.get(termId))));
+//				System.out.println("term id = " + termId + " doclen = " + TeeMap.get(termId).size());
+//				System.out.print("posting list: "+ TeeMap.get(termId));
+//				System.out.println();
 			}
+			fc.close();
 			bfc.close();
 		}
 
@@ -246,6 +313,7 @@ public class Index {
 			 * 3. do merging algorithm ??? (merge to mf file)
 			 */
 			
+			//mergeblock(bf1,bf2,mf);
 			bf1.close();
 			bf2.close();
 			mf.close();
