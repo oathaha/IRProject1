@@ -43,6 +43,24 @@ public class Query {
 		/*
 		 * TODO: Your code here
 		 */
+		
+		/*
+		 * 1. create docList (List<Integer> blabla = new ...)
+		 * 2. get term position from posDict (this integer is byte position in index file)
+		 * 3. get frequency of document from freqDict
+		 * 4. call IntBuffer ib = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), <term position in 1.>)
+		 * 	  .asIntBuffer();
+		 * 5. pos <- term position in 1.
+		 * 6. pos = pos + 2 (because pos firstly point to term id and the next number is length of posting list,
+		 * 	  we want to skip both numbers)
+		 * 7. while frequency of document > 0
+		 * 		get docID from ib (ib.get(pos/4)) // divide by 4 because each index represents 4 bytes
+		 * 		add docID to docList
+		 * 		pos+=4 // move to the next integer (or next index)
+		 * 		decrease frequency of document by 1
+		 * 8. create posting list (PostingList pl = new ...)
+		 * 9. return posting list
+		 */
 		return null;
 	}
 	
@@ -115,6 +133,13 @@ public class Query {
 		 *       return the list of IDs of the documents that match the query
 		 *      
 		 */
+	
+		/*
+		 * 1. get term id from input query
+		 * 2. create FileChannel for indexFile (look at line 34 for more ideas na)
+		 * 3. call readPosting() by sending parameters in 1. and 2. to get posting list
+		 * 4. take document id list from the posting list in 3. then return it
+		 */
 		return null;
 		
 	}
@@ -138,6 +163,15 @@ public class Query {
 		 * 
          * */
     	
+    	/*
+		 * if size of res is 0 then return "no results found"
+		 * else
+		 * 	create empty string builder (StringBuilder class)
+		 * 	for each docID in res
+		 * 		get doc name from docDict
+		 * 		append doc name to string builder
+		 * 	return string builder as string (StringBuilder.toString)
+		 */
     	return null;
     }
 	
