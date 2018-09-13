@@ -97,16 +97,17 @@ public class Index {
     	FileChannel fc1 = bf1.getChannel();
     	FileChannel fc2 = bf2.getChannel();
     	FileChannel fc3 = mf.getChannel();
-		IntBuffer ib1 = fc1.map(FileChannel.MapMode.READ_WRITE, 0, fc1.size()).asIntBuffer();
-		IntBuffer ib2 = fc2.map(FileChannel.MapMode.READ_WRITE, 0, fc2.size()).asIntBuffer();
-		IntBuffer ib3 = fc3.map(FileChannel.MapMode.READ_WRITE, 0, fc3.size()).asIntBuffer();
+		IntBuffer ib1 = fc1.map(FileChannel.MapMode.READ_ONLY, 0, fc1.size()).asIntBuffer();
+		IntBuffer ib2 = fc2.map(FileChannel.MapMode.READ_ONLY, 0, fc2.size()).asIntBuffer();
+		IntBuffer ib3 = fc3.map(FileChannel.MapMode.READ_WRITE, 0, fc1.size() + fc2.size()).asIntBuffer();
 		
 		Set<Integer> combinedocid = new TreeSet<Integer>();
 		int i1 = 0; // position for bf1
 		int i2 = 0; // position for bf2
-		int c1 = 0; // count term in bf1
-		int c2 = 0; // count term in bf2
-		
+		int sizef1 = (int)fc1.size()/4; // total number of int in fc1
+		int sizef2 = (int)fc2.size()/4; // total number of int in fc2
+		int l; // for loop
+		System.out.println(sizef1 + " " + sizef2);
 		try
 		{
 			while(true)
@@ -115,37 +116,137 @@ public class Index {
 				int tid2 = ib2.get(i2);	i2++;
 				int doclen1 = ib1.get(i1); i1++;
 				int doclen2 = ib2.get(i2); i2++;
+				int c1 = 0; // count doc in bf1
+				int c2 = 0; // count doc in bf2
 				
-				if(tid1 == tid2) // we can merge
+				sizef1-=2;
+				sizef2-=2;
+				
+				if(tid1 == tid2) // we can merge posting list
 				{
-					i1++; c1++;
-					i2++; c2++;
+					// end of list when c1 == doclen1 or c2 == doclen2
+					while((c1 < doclen1) && (c2 < doclen2)) // merge 2 posting list
+					{
+						if(ib1.get(i1) == ib2.get(i2))
+						{
+							combinedocid.add(ib1.get(i1));
+							i1++; c1++; sizef1--;
+							i2++; c2++; sizef2--;
+						}
+						else if(ib1.get(i1) < ib1.get(i2))
+						{
+							combinedocid.add(ib1.get(i1));
+							i1++; c1++; sizef1--;
+						}
+						else
+						{
+							combinedocid.add(ib2.get(i2));
+							i2++; c2++; sizef2--;
+						}
+					}
+					
+					for(l = c1; l<doclen1; l++)
+					{
+						combinedocid.add(ib1.get(i1));
+						sizef1--;
+						i1++;
+					}
+					
+					for(l = c2; l<doclen2; l++)
+					{
+						combinedocid.add(ib2.get(i2));
+						sizef2--;
+						i2++;
+					}
+					/*if(c1 > c2) // more doc in posting list 1
+					{
+						for(l = c1; l<=doclen1; l++)
+						{
+							combinedocid.add(ib1.get(i1));
+							sizef1--;
+							i1++;
+						}
+							
+						//i1 = l;
+						//i1 += l-i1;
+					}
+					else if(c2 > c1) // more doc in posting list 2
+					{
+						for(l = c2; l<=doclen2; l++)
+						{
+							combinedocid.add(ib2.get(i2));
+							sizef2--;
+							i2++;
+						}
+							
+						//i2 = l;
+						//i2 += l-i2;
+					}*/
+					ib3.put(tid1);
+					ib3.put(combinedocid.size());
+					for(Integer a: combinedocid)
+						ib3.put(a);
+					combinedocid.clear();
 					
 				}
 				else if(tid1 < tid2)
 				{
-					i1++; c1++;
+					ib3.put(tid1);
+					ib3.put(doclen1);
+					for(l = i1; l<i1+doclen1; l++)
+					{
+						ib3.put(ib1.get(i1));
+						sizef1--;
+						i1++;
+					}
+						
+					//i1 = l;
+					//i1+=doclen1;
+					//sizef1 -= doclen1;
 				}
 				else
 				{
-					i2++; c2++;
+					ib3.put(tid2);
+					ib3.put(doclen2);
+					for(l = i2; l<i2+doclen2; l++)
+					{
+						ib3.put(ib2.get(i2));
+						sizef2--;
+						i2++;
+					}
+						
+					//i2 = l;
+					//i2+=doclen2;
+					//sizef2 -= doclen2;
 				}
+				System.out.println(sizef1 + " " + sizef2);
 			}
 		}
 		catch(Exception e)
 		{
 			// put the rest of file to mf
-			// if c1 < c2 then put the rest from bf1 to mf
-			// if c1 > c2 then put the rest from bf2 to mf
-			if(c1 < c2)
+			// if sizef1 = i1 then put the rest from bf2 to mf
+			// if sizef2 = i2 then put the rest from bf1 to mf
+			System.out.println("size f1 = " + sizef1);
+			System.out.println("size f2 = " + sizef2);
+			if(sizef1 == 0) // reach the end of bf1
 			{
-				
+				for(int a = i2; a < fc2.size()/4; a++)
+				{
+					ib3.put(ib2.get(a));
+				}
+				System.out.println("put f2 all");
 			}
-			else
+			else if(sizef2 == 0) // reach the end of bf2
 			{
-				
+				for(int a = i1; a < fc1.size()/4; a++)
+				{
+					ib3.put(ib1.get(a));
+				}
+				System.out.println("put f1 all");
 			}
-			System.out.println("Merge done");
+			//System.out.println("f1 size: " + sizef1 + ", f2 size: " + sizef2);
+			//System.out.println("Merge done");
 		}
     }
    
@@ -192,7 +293,7 @@ public class Index {
 		
 		
 		/*calldelete line 264-294*/
-		//deleteDir(outdir);
+		deleteDir(outdir);
 		
 		
 		if (!outdir.exists()) {
@@ -313,7 +414,7 @@ public class Index {
 			 * 3. do merging algorithm ??? (merge to mf file)
 			 */
 			
-			//mergeblock(bf1,bf2,mf);
+			mergeblock(bf1,bf2,mf);
 			bf1.close();
 			bf2.close();
 			mf.close();
@@ -326,6 +427,7 @@ public class Index {
 		
 		/* Dump constructed index back into file system */
 		File indexFile = blockQueue.removeFirst();
+		//System.out.println(outputDirname + " " + indexFile.getName());
 		indexFile.renameTo(new File(outputDirname, "corpus.index"));
 
 		BufferedWriter termWriter = new BufferedWriter(new FileWriter(new File(
