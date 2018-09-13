@@ -99,15 +99,15 @@ public class Index {
     	FileChannel fc3 = mf.getChannel();
 		IntBuffer ib1 = fc1.map(FileChannel.MapMode.READ_ONLY, 0, fc1.size()).asIntBuffer();
 		IntBuffer ib2 = fc2.map(FileChannel.MapMode.READ_ONLY, 0, fc2.size()).asIntBuffer();
-		IntBuffer ib3 = fc3.map(FileChannel.MapMode.READ_WRITE, 0, fc1.size() + fc2.size()).asIntBuffer();
-		
+	
 		Set<Integer> combinedocid = new TreeSet<Integer>();
+		List<Integer> allcombine = new ArrayList<Integer>();
 		int i1 = 0; // position for bf1
 		int i2 = 0; // position for bf2
 		int sizef1 = (int)fc1.size()/4; // total number of int in fc1
 		int sizef2 = (int)fc2.size()/4; // total number of int in fc2
 		int l; // for loop
-		System.out.println(sizef1 + " " + sizef2);
+		//System.out.println(sizef1 + " " + sizef2);
 		try
 		{
 			while(true)
@@ -158,44 +158,27 @@ public class Index {
 						sizef2--;
 						i2++;
 					}
-					/*if(c1 > c2) // more doc in posting list 1
-					{
-						for(l = c1; l<=doclen1; l++)
-						{
-							combinedocid.add(ib1.get(i1));
-							sizef1--;
-							i1++;
-						}
-							
-						//i1 = l;
-						//i1 += l-i1;
-					}
-					else if(c2 > c1) // more doc in posting list 2
-					{
-						for(l = c2; l<=doclen2; l++)
-						{
-							combinedocid.add(ib2.get(i2));
-							sizef2--;
-							i2++;
-						}
-							
-						//i2 = l;
-						//i2 += l-i2;
-					}*/
-					ib3.put(tid1);
-					ib3.put(combinedocid.size());
+
+					//ib3.put(tid1);
+					//ib3.put(combinedocid.size());
+					allcombine.add(tid1);
+					allcombine.add(combinedocid.size());
 					for(Integer a: combinedocid)
-						ib3.put(a);
+						//ib3.put(a);
+						allcombine.add(a);
 					combinedocid.clear();
 					
 				}
 				else if(tid1 < tid2)
 				{
-					ib3.put(tid1);
-					ib3.put(doclen1);
+//					ib3.put(tid1);
+//					ib3.put(doclen1);
+					allcombine.add(tid1);
+					allcombine.add(doclen1);
 					for(l = i1; l<i1+doclen1; l++)
 					{
-						ib3.put(ib1.get(i1));
+						//ib3.put(ib1.get(i1));
+						allcombine.add(ib1.get(i1));
 						sizef1--;
 						i1++;
 					}
@@ -206,11 +189,14 @@ public class Index {
 				}
 				else
 				{
-					ib3.put(tid2);
-					ib3.put(doclen2);
+//					ib3.put(tid2);
+//					ib3.put(doclen2);
+					allcombine.add(tid2);
+					allcombine.add(doclen2);
 					for(l = i2; l<i2+doclen2; l++)
 					{
-						ib3.put(ib2.get(i2));
+						//ib3.put(ib2.get(i2));
+						allcombine.add(ib2.get(i2));
 						sizef2--;
 						i2++;
 					}
@@ -219,7 +205,6 @@ public class Index {
 					//i2+=doclen2;
 					//sizef2 -= doclen2;
 				}
-				System.out.println(sizef1 + " " + sizef2);
 			}
 		}
 		catch(Exception e)
@@ -227,24 +212,30 @@ public class Index {
 			// put the rest of file to mf
 			// if sizef1 = i1 then put the rest from bf2 to mf
 			// if sizef2 = i2 then put the rest from bf1 to mf
-			System.out.println("size f1 = " + sizef1);
-			System.out.println("size f2 = " + sizef2);
+			//System.out.println("size f1 = " + sizef1);
+			//System.out.println("size f2 = " + sizef2);
 			if(sizef1 == 0) // reach the end of bf1
 			{
 				for(int a = i2; a < fc2.size()/4; a++)
 				{
-					ib3.put(ib2.get(a));
+					//ib3.put(ib2.get(a));
+					allcombine.add(ib2.get(a));
 				}
-				System.out.println("put f2 all");
+				//System.out.println("put f2 all");
 			}
 			else if(sizef2 == 0) // reach the end of bf2
 			{
 				for(int a = i1; a < fc1.size()/4; a++)
 				{
-					ib3.put(ib1.get(a));
+					//ib3.put(ib1.get(a));
+					allcombine.add(ib1.get(a));
 				}
-				System.out.println("put f1 all");
+				//System.out.println("put f1 all");
 			}
+			IntBuffer ib3 = fc3.map(FileChannel.MapMode.READ_WRITE, 0, allcombine.size()*4).asIntBuffer();
+			for(Integer a: allcombine)
+				ib3.put(a);
+			
 			//System.out.println("f1 size: " + sizef1 + ", f2 size: " + sizef2);
 			//System.out.println("Merge done");
 		}
@@ -423,13 +414,40 @@ public class Index {
 			blockQueue.add(combfile);
 		}
 
-		// create postingDict here???
 		
 		/* Dump constructed index back into file system */
+//		System.out.println("block queue size: " + blockQueue.size());
+//		System.out.println(blockQueue.removeFirst().getName());
 		File indexFile = blockQueue.removeFirst();
-		//System.out.println(outputDirname + " " + indexFile.getName());
-		indexFile.renameTo(new File(outputDirname, "corpus.index"));
-
+		indexFile.renameTo(new File(outputDirname, "corpus.index")); // fail, why???
+		
+		
+		// create postingDict here???
+		RandomAccessFile index = new RandomAccessFile(indexFile, "rw");
+		FileChannel fc = index.getChannel();
+		IntBuffer ibf = fc.map(FileChannel.MapMode.READ_WRITE, 0, fc.size()).asIntBuffer();
+		
+		int i = 0;
+		int gogogo;
+		try
+		{
+			while(true)
+			{
+				int termpos = i*4;
+				int tid = ibf.get(i); i++;
+				int len = ibf.get(i); i++;
+				
+				postingDict.put(tid, new Pair(termpos,len));
+				
+				for(gogogo = 0; gogogo<len; gogogo++) // go to next term id
+					i++;
+			}
+		}
+		catch(Exception e)
+		{
+			// reach end of binary file (nothing to worry...)
+		}
+		
 		BufferedWriter termWriter = new BufferedWriter(new FileWriter(new File(
 				outputDirname, "term.dict")));
 		for (String term : termDict.keySet()) {
@@ -479,30 +497,31 @@ public class Index {
 	}
 
 	public static void main(String[] args) throws IOException {
-		/* Parse command line */
-		if (args.length != 3) {
-			System.err
-					.println("Usage: java Index [Basic|VB|Gamma] data_dir output_dir");
-			return;
-		}
-
-		/* Get index */
-		String className = "";
-		try {
-			className = args[0];
-		} catch (Exception e) {
-			System.err
-					.println("Index method must be \"Basic\", \"VB\", or \"Gamma\"");
-			throw new RuntimeException(e);
-		}
-
-		/* Get root directory */
-		String root = args[1];
-		
-
-		/* Get output directory */
-		String output = args[2];
-		runIndexer(className, root, output);
+//		/* Parse command line */
+//		if (args.length != 3) {
+//			System.err
+//					.println("Usage: java Index [Basic|VB|Gamma] data_dir output_dir");
+//			return;
+//		}
+//
+//		/* Get index */
+//		String className = "";
+//		try {
+//			className = args[0];
+//		} catch (Exception e) {
+//			System.err
+//					.println("Index method must be \"Basic\", \"VB\", or \"Gamma\"");
+//			throw new RuntimeException(e);
+//		}
+//
+//		/* Get root directory */
+//		String root = args[1];
+//		
+//
+//		/* Get output directory */
+//		String output = args[2];
+//		runIndexer(className, root, output);
+		P1Tester.testIndex("Basic", "./datasets/small", "./index/small");
 	}
 
 }
