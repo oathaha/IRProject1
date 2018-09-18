@@ -236,6 +236,12 @@ public class Index {
 			for(Integer a: allcombine)
 				ib3.put(a);
 			
+			bf1.close();
+			bf2.close();
+			mf.close();
+			fc1.close(); 
+			fc2.close(); 
+			fc3.close();
 			//System.out.println("f1 size: " + sizef1 + ", f2 size: " + sizef2);
 			//System.out.println("Merge done");
 		}
