@@ -39,7 +39,7 @@ public class Index {
 	// Term -> term id dictionary
 	// termDict.put("term",term_id)
 	private static Map<String, Integer> termDict
-		= new TreeMap<String, Integer>();
+		= new TreeMap<String, Integer>();   
 	// Block queue
 	private static LinkedList<File> blockQueue
 		= new LinkedList<File>();
