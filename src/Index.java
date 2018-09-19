@@ -68,11 +68,7 @@ public class Index {
 		 * TODO: Your code here
 		 *	 
 		 */
-		IntBuffer ib = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), (posting.getList().size()+2)*4).asIntBuffer();
-		ib.put(posting.getTermId());
-		ib.put(posting.getList().size());
-		for(Integer a: posting.getList())
-			ib.put(a);
+		index.writePosting(fc, posting);
 	}
 	
 	public void hello()
