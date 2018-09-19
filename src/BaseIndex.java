@@ -7,5 +7,5 @@ public interface BaseIndex {
 	
 	public PostingList readPosting (FileChannel fc);
 	
-	public void writePosting (FileChannel fc, PostingList p) throws IOException;
+	public void writePosting (FileChannel fc, PostingList p);
 }

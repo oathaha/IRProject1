@@ -13,7 +13,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class Query {
 
@@ -43,7 +45,8 @@ public class Query {
 		/*
 		 * TODO: Your code here
 		 */
-		return null;
+		
+		return index.readPosting(fc.position(posDict.get(termId)));
 	}
 	
 	
@@ -115,7 +118,14 @@ public class Query {
 		 *       return the list of IDs of the documents that match the query
 		 *      
 		 */
-		return null;
+		Set docids = new TreeSet<>();
+		String split[] = query.split(" ");
+		for(String str: split)
+		{
+			// get posting list for each str
+			// then add all doc ids of each posting list to docids
+		}
+		return new ArrayList<Integer>(docids);
 		
 	}
 	
