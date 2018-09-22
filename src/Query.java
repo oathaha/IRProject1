@@ -43,11 +43,9 @@ public class Query {
 		/*
 		 * TODO: Your code here
 		 */
-<<<<<<< HEAD
 		PostingList post = new PostingList(termId);
-		System.out.println(fc.position());
+		Long pos = posDict.get();
 		return post;
-=======
 		
 		/*
 		 * 1. create docList (List<Integer> blabla = new ...)
@@ -66,8 +64,7 @@ public class Query {
 		 * 8. create posting list (PostingList pl = new ...)
 		 * 9. return posting list
 		 */
-		return null;
->>>>>>> branch 'tan' of https://github.com/oathaha/IRProject1.git
+		
 	}
 	
 	
@@ -139,7 +136,6 @@ public class Query {
 		 *       return the list of IDs of the documents that match the query
 		 *      
 		 */
-<<<<<<< HEAD
 		else {
 			List<Integer> list = new ArrayList<Integer>();
 			for(Map.Entry<String, Integer> entry: termDict.entrySet()) {
@@ -147,15 +143,12 @@ public class Query {
 			}
 		}
 		
-=======
-	
 		/*
 		 * 1. get term id from input query
 		 * 2. create FileChannel for indexFile (look at line 34 for more ideas na)
 		 * 3. call readPosting() by sending parameters in 1. and 2. to get posting list
 		 * 4. take document id list from the posting list in 3. then return it
 		 */
->>>>>>> branch 'tan' of https://github.com/oathaha/IRProject1.git
 		return null;
 		
 	}
