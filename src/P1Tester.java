@@ -98,7 +98,7 @@ public class P1Tester {
 		str.append("Query Test Result: "+Arrays.toString(queries)+":\n");
 		
 		long memoryBefore = Runtime.getRuntime().totalMemory()- Runtime.getRuntime().freeMemory();
-		long startTime = System.currentTimeMillis(); 
+		long startTime = System.currentTimeMillis();
 		
 		Query queryService = new Query();
 		try {

@@ -43,7 +43,9 @@ public class Query {
 		/*
 		 * TODO: Your code here
 		 */
-		return null;
+		PostingList post = new PostingList(termId);
+		System.out.println(fc.position());
+		return post;
 	}
 	
 	
@@ -115,6 +117,13 @@ public class Query {
 		 *       return the list of IDs of the documents that match the query
 		 *      
 		 */
+		else {
+			List<Integer> list = new ArrayList<Integer>();
+			for(Map.Entry<String, Integer> entry: termDict.entrySet()) {
+				
+			}
+		}
+		
 		return null;
 		
 	}
@@ -142,13 +151,20 @@ public class Query {
     }
 	
 	public static void main(String[] args) throws IOException {
+		String[] queriesSmall = {
+				"hello",
+				"bye",
+				"you",
+				"how are you",
+				"how are you ?"
+		};
 		/* Parse command line */
-		if (args.length != 2) {
+		/*if (args.length != 2) {
 			System.err.println("Usage: java Query [Basic|VB|Gamma] index_dir");
 			return;
 		}
 
-		/* Get index */
+		 Get index 
 		String className = null;
 		try {
 			className = args[0];
@@ -158,23 +174,24 @@ public class Query {
 			throw new RuntimeException(e);
 		}
 
-		/* Get index directory */
+		 Get index directory 
 		String input = args[1];
 		
 		Query queryService = new Query();
 		queryService.runQueryService(className, input);
 		
-		/* Processing queries */
+		 Processing queries 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-		/* For each query */
+		 For each query 
 		String line = null;
 		while ((line = br.readLine()) != null) {
 			List<Integer> hitDocs = queryService.retrieve(line);
 			queryService.outputQueryResult(hitDocs);
 		}
 		
-		br.close();
+		br.close();*/
+		P1Tester.testQuery("Basic", "./index/small", queriesSmall, "./output/small");
 	}
 	
 	protected void finalize()
