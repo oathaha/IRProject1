@@ -1,3 +1,8 @@
+/*
+ * Mr. Komson Najard 5988020 Sec 1
+ * Mr. Thanadon Bunkurd 5988073 Sec 1
+ * Mr. Chanathip Pornprasit 5988179 Sec 1
+ */
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -44,8 +49,7 @@ public class Index {
 	private static LinkedList<File> blockQueue
 		= new LinkedList<File>();
 
-	private static TreeMap<Integer, TreeSet<Integer>> TeeMap = new TreeMap<Integer, TreeSet<Integer>>();
-	
+
 	// Total file counter   
 	private static int totalFileCount = 0;
 	// Document counter
@@ -70,11 +74,7 @@ public class Index {
 		 */
 		index.writePosting(fc, posting);
 	}
-	
-	public void hello()
-	{
-		
-	}
+
 	 /**
      * Pop next element if there is one, otherwise return null
      * @param iter an iterator that contains integers
@@ -108,18 +108,21 @@ public class Index {
 		{
 			while(true)
 			{
-				int tid1 = ib1.get(i1);	i1++;
-				int tid2 = ib2.get(i2);	i2++;
-				int doclen1 = ib1.get(i1); i1++;
-				int doclen2 = ib2.get(i2); i2++;
+				int tid1 = ib1.get(i1);	//i1++;
+				int tid2 = ib2.get(i2);	//i2++;
 				int c1 = 0; // count doc in bf1
 				int c2 = 0; // count doc in bf2
-				
-				sizef1-=2;
-				sizef2-=2;
+				int doclen1 = -1;
+				int doclen2 = -1;
 				
 				if(tid1 == tid2) // we can merge posting list
 				{
+					i1++; i2++;
+					doclen1 = ib1.get(i1); i1++;
+					doclen2 = ib2.get(i2); i2++;
+					sizef1-=2;
+					sizef2-=2;
+					
 					// end of list when c1 == doclen1 or c2 == doclen2
 					while((c1 < doclen1) && (c2 < doclen2)) // merge 2 posting list
 					{
@@ -129,7 +132,7 @@ public class Index {
 							i1++; c1++; sizef1--;
 							i2++; c2++; sizef2--;
 						}
-						else if(ib1.get(i1) < ib1.get(i2))
+						else if(ib1.get(i1) < ib2.get(i2))
 						{
 							combinedocid.add(ib1.get(i1));
 							i1++; c1++; sizef1--;
@@ -155,61 +158,54 @@ public class Index {
 						i2++;
 					}
 
-					//ib3.put(tid1);
-					//ib3.put(combinedocid.size());
 					allcombine.add(tid1);
 					allcombine.add(combinedocid.size());
 					for(Integer a: combinedocid)
-						//ib3.put(a);
 						allcombine.add(a);
 					combinedocid.clear();
 					
 				}
 				else if(tid1 < tid2)
 				{
-//					ib3.put(tid1);
-//					ib3.put(doclen1);
+					i1++; 
+					doclen1 = ib1.get(i1); i1++;
+					sizef1-=2;
 					allcombine.add(tid1);
 					allcombine.add(doclen1);
-					for(l = i1; l<i1+doclen1; l++)
+					for(l = 1; l<=doclen1; l++)
 					{
 						//ib3.put(ib1.get(i1));
 						allcombine.add(ib1.get(i1));
 						sizef1--;
 						i1++;
 					}
-						
-					//i1 = l;
-					//i1+=doclen1;
-					//sizef1 -= doclen1;
 				}
 				else
 				{
-//					ib3.put(tid2);
-//					ib3.put(doclen2);
+					i2++; 
+					doclen2 = ib2.get(i2); i2++;
+					sizef2-=2;
 					allcombine.add(tid2);
 					allcombine.add(doclen2);
-					for(l = i2; l<i2+doclen2; l++)
+					for(l = 1; l<=doclen2; l++)
 					{
 						//ib3.put(ib2.get(i2));
 						allcombine.add(ib2.get(i2));
 						sizef2--;
 						i2++;
 					}
-						
-					//i2 = l;
-					//i2+=doclen2;
-					//sizef2 -= doclen2;
 				}
 			}
 		}
-		catch(Exception e)
+		catch(Exception e) // problem here
+		/*
+		 * size f1 = 1
+			size f2 = 18
+		 */
 		{
 			// put the rest of file to mf
 			// if sizef1 = i1 then put the rest from bf2 to mf
 			// if sizef2 = i2 then put the rest from bf1 to mf
-			//System.out.println("size f1 = " + sizef1);
-			//System.out.println("size f2 = " + sizef2);
 			if(sizef1 == 0) // reach the end of bf1
 			{
 				for(int a = i2; a < fc2.size()/4; a++)
@@ -238,8 +234,6 @@ public class Index {
 			fc1.close(); 
 			fc2.close(); 
 			fc3.close();
-			//System.out.println("f1 size: " + sizef1 + ", f2 size: " + sizef2);
-			//System.out.println("Merge done");
 		}
     }
    
@@ -301,7 +295,8 @@ public class Index {
 		
 		/* BSBI indexing algorithm */
 		File[] dirlist = rootdir.listFiles();
-
+		TreeMap<Integer, TreeSet<Integer>> TeeMap = new TreeMap<Integer, TreeSet<Integer>>();
+		
 		/* For each block */
 		for (File block : dirlist) {
 			File blockFile = new File(outputDirname, block.getName());
@@ -319,8 +314,6 @@ public class Index {
 				 // use pre-increment to ensure docID > 0
                 int docId = ++docIdCounter;
                 docDict.put(fileName, docId);
-				
-                
 
 				BufferedReader reader = new BufferedReader(new FileReader(file));
 				String line;
@@ -368,6 +361,7 @@ public class Index {
 //				System.out.print("posting list: "+ TeeMap.get(termId));
 //				System.out.println();
 			}
+			TeeMap.clear();
 			fc.close();
 			bfc.close();
 		}
@@ -494,7 +488,7 @@ public class Index {
 			}
 		}else {
 			outdir.delete();
-			System.out.println("File is deleted "+outdir.getAbsolutePath());
+			//System.out.println("File is deleted "+outdir.getAbsolutePath());
 		}
 	}
 
